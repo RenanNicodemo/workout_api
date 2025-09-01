@@ -5,8 +5,8 @@ from datetime import datetime
 
 class BaseSchema(BaseModel):
     model_config = ConfigDict(
-        extra='forbid',         # Não permite campos extras nos modelos
-        from_attributes=True    # Permite a conversão de modelos SQLAlchemy para Pydantic
+        extra='forbid',         
+        from_attributes=True    
     )
 
 
