@@ -23,7 +23,6 @@ class AtletaService:
         categoria_nome = atleta_in.categoria.nome
         centro_treinamento_nome = atleta_in.centro_treinamento.nome
 
-        # Busca a categoria no banco de dados
         categoria = (await db_session.execute(
             select(CategoriaModel).filter_by(nome=categoria_nome))
         ).scalars().first()
@@ -34,7 +33,6 @@ class AtletaService:
                 detail=f'A categoria {categoria_nome} não foi encontrada.'
             )
 
-        # Busca o centro de treinamento no banco de dados
         centro_treinamento = (await db_session.execute(
             select(CentroTreinamentoModel).filter_by(nome=centro_treinamento_nome))
         ).scalars().first()
@@ -44,8 +42,7 @@ class AtletaService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f'O centro de treinamento {centro_treinamento_nome} não foi encontrado.'
             )
-        
-        # Tenta criar o atleta no banco de dados
+
         try:
             atleta_out = AtletaOut(id=uuid4(), created_at=datetime.utcnow(), **atleta_in.model_dump())
             atleta_model = AtletaModel(**atleta_out.model_dump(exclude={'categoria', 'centro_treinamento'}))
@@ -57,15 +54,13 @@ class AtletaService:
             await db_session.commit()
             await db_session.refresh(atleta_model)
 
-        # Captura o erro de violação de integridade (CPF único)
         except IntegrityError:
             await db_session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_303_SEE_OTHER,
                 detail=f"Já existe um atleta cadastrado com o cpf: {atleta_in.cpf}"
             )
-        
-        # O `refresh` não carrega os relacionamentos, então os associamos manualmente para o retorno
+
         atleta_out.categoria = categoria
         atleta_out.centro_treinamento = centro_treinamento
         
@@ -96,8 +91,8 @@ class AtletaService:
         query = (
             select(AtletaModel)
             .options(
-                selectinload(AtletaModel.centro_treinamento), # <--- Carregar o relacionamento
-                selectinload(AtletaModel.categoria)          # <--- Carregar o relacionamento
+                selectinload(AtletaModel.centro_treinamento),
+                selectinload(AtletaModel.categoria)          
             )
         )
         
@@ -125,7 +120,6 @@ class AtletaService:
                 detail=f'Atleta não encontrado com id: {id}'
             )
         
-        # Atualiza apenas os campos que foram enviados
         atleta_update_data = atleta_up.model_dump(exclude_unset=True)
         for key, value in atleta_update_data.items():
             setattr(atleta, key, value)
@@ -152,3 +146,4 @@ class AtletaService:
         
         await db_session.delete(atleta)
         await db_session.commit()
+
