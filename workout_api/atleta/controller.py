@@ -1,14 +1,11 @@
 from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
-
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from fastapi_pagination import Page, paginate
 from pydantic import UUID4
-
 from workout_api.atleta.models import AtletaModel
-from workout_api.atleta.schemas import (AtletaCustom, AtletaIn, AtletaOut,
-                                       AtletaUpdate)
+from workout_api.atleta.schemas import (AtletaCustom, AtletaIn, AtletaOut, AtletaUpdate)
 from workout_api.atleta.service import AtletaService
 from workout_api.contrib.dependencies import DatabaseDependency
 
